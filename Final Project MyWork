@@ -1,0 +1,398 @@
+import java.util.Arrays;
+import java.util.Stack;
+
+/**
+ * COMP 272 â€“ Final Exam
+ * Name: Maja Swiderska
+ * Students:
+ *  - Do NOT change class or method names or signatures.
+ *  - You may add private helper methods.
+ *  - Implement all TODOs.
+ */
+
+public class FinalExam {
+
+    // ==========================
+    // Exercise 1: Middle of a list
+    // ==========================
+
+    // Singly linked node
+    public static class SNode<E> {
+        public E data;
+        public SNode<E> next;
+
+        public SNode(E data) {
+            this.data = data;
+        }
+    }
+
+    /**
+     * Simple singly-linked list.
+     * For this exercise, you must complete findMiddle().
+     */
+    public static class LinkedList<E> {
+        SNode<E> head;
+
+        public void addLast(E value) {
+            if (head == null) {
+                head = new SNode<>(value);
+            } else {
+                SNode<E> curr = head;
+                while (curr.next != null) curr = curr.next;
+                curr.next = new SNode<>(value);
+            }
+        }
+
+        /**
+         * Returns the middle node using two pointers.
+         * For lists with an even number of elements,
+         * you may return (n+1)-th element as "middle"
+         */
+        public SNode<E> findMiddle() {
+            //Checking if the list is empty
+            //If the head is null, that means that there are no nodes. Which means no middle
+            if(head == null) {
+                return null; //It returns nothing because there is no middle in the empty list
+            }
+            //I'm creating the two pointers
+            SNode<E> slow = head; //This moves one step at a time
+            SNode<E> fast = head; //This should move two steps at a time
+
+            //Now I'm moving pointers until the fast gets to the end
+            //The 'fast != null' is checking if the fast pointer is even real
+            //The 'fast.next != null' is checking if the fast can take another step
+            while(fast != null && fast.next != null) {
+                slow = slow.next; //Moving slow one step up
+                fast = fast.next.next; //Moving fast two steps up
+            }
+            //When the loop ends, fast has reached the end
+            //This means that slow is in the middle of the list
+            return slow;
+        }
+    }
+
+    // Doubly linked node
+    public static class DNode<E> {
+        public E data;
+        public DNode<E> next;
+        public DNode<E> prev;
+
+        public DNode(E data) {
+            this.data = data;
+        }
+    }
+
+    /**
+     * Simple doubly-linked list.
+     * For this exercise, you must complete find_middle().
+     */
+    public static class DoublyLinkedList<E> {
+        DNode<E> head;
+        DNode<E> tail;
+
+        public void addLast(E value) {
+            if (head == null) {
+                head = tail = new DNode<>(value);
+            } else {
+                DNode<E> node = new DNode<>(value);
+                tail.next = node;
+                node.prev = tail;
+                tail = node;
+            }
+        }
+
+        /**
+         * Returns the middle node using 2 pointers with the same speed.
+         * For lists with an even number of elements,
+         * you may return (n+1)-th element as "middle"
+         */
+        public DNode<E> findMiddle() {
+            //Checking if the list is empty
+            if(head == null) {
+                return null; //There is no middle in the empty list
+            }
+            //Checking if the list has only one node
+            //If the head and the tail are the same nodes, there is only one node
+            if(head == tail) {
+                return head; //The single node is its own middle
+            }
+            //Starting pointers from both ends
+            DNode<E> start = head; //This is the pointer from the beginning
+            DNode<E> end = tail; //This is the pointer from the end
+
+            //Now I'm moving the pointers towards each other
+            //The 'start != end' means that it should stop when the pointers meet
+            //The 'start.next != end' means that it should stop when the pointers are next to each other
+            while(start != end && start.next != end) {
+                start = start.next; //Moving start up
+                end = end.prev; //Moving end back
+            }
+            //Returning the middle
+            //For the even length, end will be at (n+1)th position
+            return end;
+        }
+    }
+
+    // ==========================
+    // Exercise 2: BrowserHistory with two stacks
+    // ==========================
+
+    /**
+     * Simulates a browser navigation system using two stacks:
+     * back and forward, plus the current page.
+     */
+    public static class BrowserHistory {
+        Stack<String> back = new Stack<>();
+        Stack<String> forward = new Stack<>();
+        String current = null;
+
+        /**
+         * Visit a new page:
+         */
+        public void visit(String url) {
+            //If there is a current page, it should be saved, so I can go back to it
+            if(current != null) {
+                //I need to save the current back to the back stack
+                //This is marking it, so I can go back to it later
+                back.push(current); //Pushing current page onto the back stack
+            }
+            //Clearing the forward history, this can cause me to not go forward after new visits
+            forward.clear();
+            //Setting up a new page as current, meaning I go to the new page
+            current = url;
+        }
+
+        /**
+         * Go back one page:
+         */
+        public String back() {
+            //Checking if I'm able to go back
+            if(back.isEmpty()) {
+                //If the back stack is empty, that means that there is nowhere to go back to
+                return current; //I cannot go back so that means that I stay on the current page
+            }
+            //This is saving the current page to go forward to later
+            //I'm leaving this page, I might go back to it
+            forward.push(current);
+            //This is getting the previous page from the back stack
+            //The pop method just removes and returns the top item
+            current = back.pop();
+
+            //This is return the new current page
+            return current;
+        }
+
+        /**
+         * Go forward one page
+         */
+        public String forward() {
+            //I'm checking if I can go forward
+            if(forward.isEmpty()) {
+                //If forward stack is empty, that means that there is nowhere to go forward to
+                return current; //I cannot go forward so that means that I stay on the current page
+            }
+            //This is saving the current page to go back to later
+            back.push(current);
+            //This is getting the next page from the forward stack
+            current = forward.pop();
+
+            //This is returning the new current page
+            return current;
+        }
+    }
+
+    // ==========================
+    // Exercise 3: canFinish (graph cycle detection with DFS)
+    // ==========================
+
+    public static class ExamScheduler {
+
+        /**
+         * Returns true if it is possible to complete all exams.
+         *
+         * Use DFS with recursion stack.
+         */
+        public static boolean canFinish(int numExams, int[][] prerequisites) {
+            //I'm creating a list of which exams need other exams
+            //g[i] is the list of exams that need exam i first
+            //I'm also building the graph as an adjacency list
+            java.util.List<Integer>[] g = new java.util.ArrayList[numExams];
+            //making each list as empty
+            for (int i = 0; i < numExams; i++) {
+                g[i] = new java.util.ArrayList<>(); //Starting out with an empty list
+            }
+            //Filling in the lists
+            //[a, b] means [to take exam a, you need exam b first]
+            for (int[] p : prerequisites) {
+                int examA = p[0]; //This is the exam that has a requirement
+                int examB= p[1]; //This is the exam that must be first
+                //Adding examA to the list of exams that depend on examB
+                g[examB].add(examA); //exam b is needed for exam a
+            }
+            //Now I need to track each of the exam's status, so I need to create a state array
+            //0 = not visited, 1 = is being check on, 2 = done checking
+            int[] state = new int[numExams];
+            //Checking on each of the exams
+            for (int i = 0; i < numExams; i++) {
+                if (state[i] == 0) { //If the exam is not checked yet
+                    //Staring dfs from this exam
+                    //And if dfs finds a cycle it should return false
+                    if (dfs(i, g, state)) {
+                        return false; //found a circular dependency, that means that it's impossible to finish all the exams
+                    }
+                }
+            }
+            //no circular dependencies found, meaning all the exams can be completed
+            return true;
+        }
+        private static boolean dfs(int exam, java.util.List<Integer>[] graph, int[] state) {
+            //I'm marking the current exam as 'currently visiting' (state = 1)
+            //This means that I'm currently checking this exam and its dependencies
+            state[exam] = 1;
+
+            //Checking all the exams that depend on this exam
+            for (int nextExam : graph[exam]) {
+                //If I find an exam that's currently being visited
+                if (state[nextExam] == 1) {
+                    //Cycle is found
+                    //This means that the exam depends on nextExam, and nextExam depends on exam
+                    return true;
+                }
+                //If I find an exam that hasn't been visited yet
+                if (state[nextExam] == 0) {
+                    //Recursively checking that exam
+                    //If a cycle is found deeper in the recursion, it should be returned true
+                    if (dfs(nextExam, graph, state)) {
+                        return true;  //Cycle has been detected deeper in the graph
+                    }
+                }
+            }
+
+            //Now I'm marking the current exam as 'completely visited' or 2
+            //I checked this exam and all the exams that depend on it
+            //No cycles were found in this branch though
+            state[exam] = 2;
+
+            //Returning it false because no cycle was found for this exam
+            return false;
+        }
+    }
+
+    // ==========================
+    // Exercise 4: Modified Selection Sort
+    // ==========================
+
+    public static class SelectionSortUtils {
+
+        /**
+         * Sorts arr using SELECTION SORT.
+         * If descending == false, sort ascending.
+         * If descending == true, sort descending.
+         * Default: Sorts arr in ascending order
+         * Do NOT use built-in sorting methods.
+         * */
+        public static void selectionSort(int[] arr, boolean descending) {
+            // I'm going through each position in the array
+            for (int i = 0; i < arr.length - 1; i++) {
+                //I was thinking that the current position has the right number
+                int targetIndex = i;
+
+                //I'm looking at all of the numbers to the right
+                for (int j = i + 1; j < arr.length; j++) {
+                    if (descending) {
+                        //for descending -> (biggest to smallest)
+                        //I need to look for the biggest number
+                        if (arr[j] > arr[targetIndex]) {
+                            targetIndex = j; //I found a big number
+                        }
+                    } else {
+                        //Now for ascending -> (smallest to biggest)
+                        // I need to look for the smallest number
+                        if (arr[j] < arr[targetIndex]) {
+                            targetIndex = j; //I found the small number
+                        }
+                    }
+                }
+                //Now if I found a better number, I should swap it into position i
+                if(targetIndex != i) {
+                    int temp = arr[targetIndex]; //saving the good number
+                    arr[targetIndex] = arr[i]; //Moving the current number out of the way
+                    arr[i] = temp; //Putting the good number into the current position
+                }
+            }
+        }
+        public static void selectionSort(int[] arr) {
+            selectionSort(arr, false); //I put false because it means ascending order
+        }
+
+        public static String arrayToString(int[] arr) {
+            return Arrays.toString(arr);
+        }
+    }
+
+    // ==========================
+    // Exercise 5: Priority Queue â€“ Min Heap
+    // ==========================
+
+    /**
+     * Simple array-based min-heap with 0-based indexing.
+     * You must implement add(int value) with percolate-up.
+     */
+    public static class LUCMinHeap {
+        int[] heap;
+        int size;
+
+        public LUCMinHeap(int capacity) {
+            heap = new int[capacity];
+            size = 0;
+        }
+
+        int parent(int i) {
+            return (i - 1) / 2;
+        }
+
+        int left(int i) {
+            return 2 * i + 1;
+        }
+
+        int right(int i) {
+            return 2 * i + 2;
+        }
+
+        void swap(int i, int j) {
+            int tmp = heap[i];
+            heap[i] = heap[j];
+            heap[j] = tmp;
+        }
+
+        /**
+         * Insert value into the min-heap
+         */
+        public void add(int value) {
+            // I'm checking if the heap is full
+            if(size >= heap.length) {
+                throw new IllegalStateException("Heap is full");
+            }
+            //Putting in a new number at the end
+            //I'm adding the new value at the end of the heap array, and the end is at position size
+            heap[size] = value;
+            //I need to remember on where I put it
+            int current = size;
+            //Increasing the size
+            size++;
+
+            //In the min-heap, the parent must be smaller than the child
+            //I need to keep swapping with the parent while the new number is smaller than the paremt
+            while(current > 0 && heap[current] < heap[parent(current)]) {
+                swap(current, parent(current)); //Swapping with the parent
+                current = parent(current); //Now I'm moving the parent's position
+            }
+        }
+
+        @Override
+        public String toString() {
+            int[] used = Arrays.copyOf(heap, size);
+            return Arrays.toString(used);
+        }
+    }
+}
