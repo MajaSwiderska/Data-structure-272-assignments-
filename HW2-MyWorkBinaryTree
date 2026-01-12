@@ -1,0 +1,115 @@
+/*
+ * *** Maja Swiderska / COMP 272/400C-001 ***
+ *
+ * This file shows a simple Binary Tree (we'll insert like a BST for convenience).
+ * You will implement two small helpers:
+ *   1) replaceValueHelper(node, oldVal, newVal)  -- replace every match of oldVal with newVal
+ *   2) averageHelper(node) -> int[]{sum, count}  -- return subtree sum and node count
+ *
+ * Keep your code clear and direct. No tricks.
+ */
+
+class BTNode {
+    int data;
+    BTNode left, right;
+    BTNode(int d) { data = d; }
+}
+
+public class BinaryTree {
+    private BTNode root;
+
+    public BinaryTree() { root = null; }
+    public void clear()  { root = null; }
+
+    /* Insert like a simple BST so we can build a predictable shape quickly. */
+    public void insert(int value) { root = insertRec(root, value); }
+    private BTNode insertRec(BTNode n, int v) {
+        if (n == null) return new BTNode(v);
+        if (v < n.data) n.left  = insertRec(n.left, v);
+        else if (v > n.data) n.right = insertRec(n.right, v);
+        else { /* duplicate -> do nothing */ }
+        return n;
+    }
+
+    /* Preorder traversal as a single string with spaces, ending with a space. */
+    public String preOrder() { return preOrderRec(root); }
+    private String preOrderRec(BTNode n) {
+        if (n == null) return "";
+        return n.data + " " + preOrderRec(n.left) + preOrderRec(n.right);
+    }
+
+    /* Replace all occurrences of oldVal with newVal in the entire tree. */
+    public void replaceValue(int oldVal, int newVal) {
+        replaceValueHelper(root, oldVal, newVal); // you implement the helper
+    }
+
+    /* Return the average of all node values as a double.
+       If the tree is empty, we define the average to be 0.0 (simple and safe). */
+    public double average() {
+        if (root == null) return 0.0; // empty tree -> average is 0.0
+        int[] pair = averageHelper(root); // pair[0] = sum, pair[1] = count
+        int sum = pair[0], count = pair[1];
+        if (count == 0) return 0.0;   // safety
+        return (double) sum / (double) count;
+    }
+
+    /***********************************************************
+     * YOUR WORK STARTS HERE
+     * Implement the two helpers below. Keep them small and clean.
+     ***********************************************************/
+
+    /* replaceValueHelper:
+       Visit every node. If node.data == oldVal, change it to newVal. */
+    protected void replaceValueHelper(BTNode node, int oldVal, int newVal) {
+        // TODO: implement (use simple recursion). If node is null, just return.
+
+        //If I reach a null node, stop recursion
+        //This happens when we go left/right from a leaf node
+        if(node == null) {
+            return; //Nothing to do
+        }
+        //I need to check if the current node's data matches the value that I'm looking for
+        if(node.data == oldVal) {
+            //If the match is found, replace the value
+            node.data = newVal;
+        }
+        //Go through the nodes in the left subtree
+        replaceValueHelper(node.left, oldVal, newVal);
+        //Go through the nodes in the right subtree
+        replaceValueHelper(node.right, oldVal, newVal);
+
+        //No return value needed because I'm modifying the tree in place
+    }
+
+    /* averageHelper:
+       Return an int array {sum, count} for this subtree.
+       Use post-order style: get left pair, right pair, then add current node. */
+    protected int[] averageHelper(BTNode node) {
+        // TODO: implement and return {sum, count}
+
+        //If the node is null, return zero values
+        //An empty subtree has the sum = 0 and count = 0
+        if(node == null) {
+            return new int[]{0, 0}; // {sum, count} for empty subtree
+        }
+        //Recursively get the sum and count from the left child's subtree
+        int[] leftResult = averageHelper(node.left);
+        int leftSum = leftResult[0]; //The total sum of the left subtree
+        int leftCount = leftResult[1]; //The total node count of the left subtree
+
+        //Recursively get the sum and count from the right child's subtree
+        int[] rightResult = averageHelper(node.right);
+        int rightSum = rightResult[0]; //The total sum of the right subtree
+        int rightCount = rightResult[1]; //The total node count of the right subtree
+
+        //I need to calculate the total node count for the current subtree
+        //left sum + right sum + current node's data
+        int sum = leftSum + rightSum + node.data;
+        //I also need to calculate the total node count for the current subtree
+        //left count + right count + 1 (for the current node)
+        int count = leftCount + rightCount + 1;
+
+        //I return an array that contains {total sum, total count}
+        return new int[]{sum, count};
+    }
+}
